@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "qrview",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/seo": "^2.2.0",
     "@nuxtjs/tailwindcss": "^6.13.1",
     "@vueuse/core": "^12.7.0",
     "class-variance-authority": "^0.7.1",

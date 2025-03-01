@@ -1,0 +1,16 @@
+{
+  "name": "QRView",
+  "short_name": "QRView",
+  "description": "A fast and simple QR code generator",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0F172A",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

@@ -1,5 +1,13 @@
 <template>
   <div class="container mx-auto p-8 max-w-xl">
+    <Head>
+      <Title>Fast & Simple QR Code Generator</Title>
+      <Meta name="description" content="Generate QR codes instantly with customizable settings. Download as PNG or SVG with no signup required." />
+      <Link rel="manifest" href="/manifest.json" />
+      <Meta name="apple-mobile-web-app-capable" content="yes" />
+      <Meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    </Head>
+    
     <h1 class="text-2xl font-bold mb-6 text-center">QR Code Generator</h1>
     
     <div class="space-y-6">
@@ -171,6 +179,30 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import QrHistoryPanel from '@/components/QrHistoryPanel.vue'
 import { useQrHistory, type QrHistoryItem } from '@/composables/useQrHistory'
+
+// Add structured data for rich search results
+useSeoMeta({
+  ogImage: 'https://qrview.netlify.app/screenshot.png',
+  schemaOrg: {
+    '@type': 'WebApplication',
+    name: 'QRView',
+    description: 'A fast and simple QR code generator with customization options.',
+    url: 'https://qrview.netlify.app',
+    applicationCategory: 'UtilityApplication',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD'
+    },
+    author: {
+      '@type': 'Person',
+      name: 'Ruslan Belyy',
+      url: 'https://ruslanbelyy.com/'
+    },
+    browserRequirements: 'Requires JavaScript. Requires HTML5.',
+    operatingSystem: 'All'
+  }
+})
 
 const url = ref('')
 const qrCode = ref('')
