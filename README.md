@@ -1,110 +1,149 @@
-# QR View
+# QRView
 
-A simple QR code generator built with Nuxt 3, TypeScript, and ShadCN Vue. Generate QR codes from URLs and download them as PNG or SVG files.
+<p align="center">
+  <a href="https://github.com/peopleoff/qrview">
+    <img src="https://img.shields.io/github/stars/peopleoff/qrview?style=social" alt="GitHub stars" />
+  </a>
+  <a href="https://qrview.netlify.app/">
+    <img src="https://img.shields.io/badge/website-qrview.netlify.app-blue" alt="Website" />
+  </a>
+  <a href="https://ruslanbelyy.com/">
+    <img src="https://img.shields.io/badge/author-Ruslan%20Belyy-orange" alt="Author" />
+  </a>
+</p>
 
-## Features
+<div align="center">
+  <img src="https://img.shields.io/badge/vue.js-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white" alt="Vue.js" />
+  <img src="https://img.shields.io/badge/nuxt.js-00DC82?style=for-the-badge&logo=nuxt.js&logoColor=white" alt="Nuxt.js" />
+  <img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="TailwindCSS" />
+</div>
 
-- Generate QR codes from URLs
-- Customize error correction level (L, M, Q, H)
-- Adjust QR code size
-- Download as PNG or SVG
-- History panel to save and reuse previous QR codes
-- Native sharing on supported devices
-- Smooth animations and loading states
-- Responsive design with mobile-friendly UI
+<p align="center">
+  A sleek, modern QR code generator built with Nuxt 3, TypeScript, and ShadCN Vue.
+</p>
 
-## Tech Stack
+<div align="center">
+  <img src="/public/screenshot.png" alt="QRView Screenshot" width="600" />
+</div>
 
-- [Nuxt 3](https://nuxt.com/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [ShadCN Vue](https://shadcn-vue.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [QRCode](https://github.com/soldair/node-qrcode)
+<p align="center">
+  <a href="https://qrview.netlify.app/" target="_blank">🔗 Live Demo: https://qrview.netlify.app/</a>
+</p>
 
-## Setup
+## ✨ Features
 
-Make sure to install dependencies:
+- **Instant QR Generation** - Generate QR codes from any URL with a single click
+- **Customization Options**:
+  - Adjust error correction level (L, M, Q, H) for optimal scanning reliability
+  - Customize QR code size to fit your needs
+- **Multiple Export Formats** - Download as PNG or SVG for perfect quality at any size
+- **History Management** - Save and reuse previous QR codes with a convenient history panel
+- **Cross-Platform Sharing** - Native sharing integration with mobile devices
+- **Polished UX** - Smooth animations and loading states for a premium feel
+- **Responsive Design** - Works flawlessly on desktop, tablet, and mobile devices
 
-```bash
-# npm
-npm install
+## 🚀 Getting Started
 
-# pnpm
-pnpm install
+### Prerequisites
 
-# yarn
-yarn install
+- Node.js 16.x or higher
+- npm, yarn, or pnpm
 
-# bun
-bun install
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/peopleoff/qrview.git
+   cd qrview
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 🛠️ Technologies Used
+
+- **[Nuxt 3](https://nuxt.com/)** - Vue.js framework for building modern web applications
+- **[TypeScript](https://www.typescriptlang.org/)** - Strongly typed programming language for enhanced development
+- **[ShadCN Vue](https://shadcn-vue.com/)** - Re-usable components built with Radix Vue and Tailwind CSS
+- **[TailwindCSS](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[QRCode.js](https://github.com/soldair/node-qrcode)** - QR code generation library
+- **[VueUse](https://vueuse.org/)** - Collection of essential Vue Composition API utilities
+
+## 🧰 Project Structure
+
+```
+qrview/
+├── components/            # Vue components
+│   ├── ui/                # ShadCN UI components
+│   └── QrHistoryPanel.vue # QR code history component
+├── composables/           # Vue composables
+│   └── useQrHistory.ts    # QR history state management
+├── lib/                   # Utility functions
+│   └── utils.ts           # Shared utilities
+├── assets/                # Static assets (CSS, fonts, etc.)
+├── public/                # Public assets (favicon, etc.)
+├── app.vue                # Main application component
+└── nuxt.config.ts         # Nuxt configuration
 ```
 
-## Development Server
+## 📋 Usage Guide
 
-Start the development server on `http://localhost:3000`:
+1. **Generate a QR Code**
+   - Enter any URL in the input field
+   - Click "Generate QR Code" or press Enter
 
-```bash
-# npm
-npm run dev
+2. **Customize Your QR Code**
+   - Click the settings icon to access customization options
+   - Adjust error correction level and size as needed
 
-# pnpm
-pnpm dev
+3. **Export Your QR Code**
+   - Click "PNG" or "SVG" to download in your preferred format
+   - On supported devices, use the "Share" button
 
-# yarn
-yarn dev
+4. **Access History**
+   - Click the history icon to view previously generated QR codes
+   - Click on any history item to restore it
+   - Remove unwanted items with the delete button
 
-# bun
-bun run dev
-```
+## 🤝 Contributing
 
-## Production
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Build the application for production:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-```bash
-# npm
-npm run build
+## 📄 License
 
-# pnpm
-pnpm build
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-# yarn
-yarn build
+## 🙏 Acknowledgments
 
-# bun
-bun run build
-```
+- [ShadCN UI](https://ui.shadcn.com/) for the beautiful component designs
+- [QRCode.js](https://github.com/soldair/node-qrcode) for the QR code generation functionality
 
-Locally preview production build:
+---
 
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-## Using the Application
-
-1. Enter a URL in the input field
-2. (Optional) Adjust QR code options:
-   - Error correction level - determines how much of the QR code can be damaged while still being readable
-   - QR code size - adjust the pixel dimensions of the generated code
-3. Click "Generate QR Code"
-4. Download the QR code as PNG or SVG
-
-## Error Correction Levels
-
-- **L (Low)**: 7% of codewords can be restored
-- **M (Medium)**: 15% of codewords can be restored
-- **Q (Quartile)**: 25% of codewords can be restored
-- **H (High)**: 30% of codewords can be restored
-
-Higher error correction levels make the QR code more resistant to damage but increase its complexity.
+<p align="center">
+  Made with ❤️ by <a href="https://ruslanbelyy.com/">Ruslan Belyy</a>
+</p>
