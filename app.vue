@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import QRCode from 'qrcode'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,8 +9,11 @@ import { useQrHistory, type QrHistoryItem } from '@/composables/useQrHistory'
 
 // Add structured data for rich search results
 useSeoMeta({
-  ogImage: 'https://qrview.netlify.app/screenshot.png',
-  schemaOrg: {
+  ogImage: 'https://qrview.netlify.app/screenshot.png'
+})
+
+useSchemaOrg([
+  {
     '@type': 'WebApplication',
     name: 'QRView',
     description: 'A fast and simple QR code generator with customization options.',
@@ -29,7 +32,13 @@ useSeoMeta({
     browserRequirements: 'Requires JavaScript. Requires HTML5.',
     operatingSystem: 'All'
   }
-})
+])
+
+interface UrlParameter {
+  id: string
+  key: string
+  value: string
+}
 
 const url = ref('')
 const qrCode = ref('')
@@ -39,7 +48,32 @@ const errorCorrectionLevel = ref<'L' | 'M' | 'Q' | 'H'>('M')
 const qrSize = ref(300)
 const isSharingSupported = ref(false)
 const isGenerating = ref(false)
+const urlParams = ref<UrlParameter[]>([])
 const { addToHistory } = useQrHistory()
+
+// Computed property to construct the final URL with parameters
+const finalUrl = computed(() => {
+  if (!url.value) return ''
+  
+  const validParams = urlParams.value.filter(param => param.key.trim() && param.value.trim())
+  if (validParams.length === 0) return url.value
+  
+  try {
+    const urlObj = new URL(url.value)
+    validParams.forEach(param => {
+      urlObj.searchParams.set(param.key.trim(), param.value.trim())
+    })
+    return urlObj.toString()
+  } catch {
+    // If URL is invalid, fallback to manual parameter construction
+    const paramString = validParams
+      .map(param => `${encodeURIComponent(param.key.trim())}=${encodeURIComponent(param.value.trim())}`)
+      .join('&')
+    
+    const separator = url.value.includes('?') ? '&' : '?'
+    return `${url.value}${separator}${paramString}`
+  }
+})
 
 // Check if Web Share API is supported
 onMounted(() => {
@@ -47,6 +81,23 @@ onMounted(() => {
     isSharingSupported.value = !!navigator.share
   }
 })
+
+// URL parameter management functions
+const addUrlParam = () => {
+  urlParams.value.push({
+    id: generateId(),
+    key: '',
+    value: ''
+  })
+}
+
+const removeUrlParam = (id: string) => {
+  urlParams.value = urlParams.value.filter(param => param.id !== id)
+}
+
+const generateId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 9)
+}
 
 const generateQR = async () => {
   if (!url.value) return
@@ -59,7 +110,9 @@ const generateQR = async () => {
     // Add a slight delay to make the animation visible
     await new Promise(resolve => setTimeout(resolve, 600))
 
-    qrCode.value = await QRCode.toDataURL(url.value, {
+    const urlToEncode = finalUrl.value || url.value
+
+    qrCode.value = await QRCode.toDataURL(urlToEncode, {
       width: qrSize.value,
       margin: 2,
       errorCorrectionLevel: errorCorrectionLevel.value,
@@ -67,7 +120,7 @@ const generateQR = async () => {
 
     // Add to history
     addToHistory({
-      url: url.value,
+      url: urlToEncode,
       qrCode: qrCode.value,
       settings: {
         errorCorrectionLevel: errorCorrectionLevel.value,
@@ -85,11 +138,12 @@ const downloadQR = async (format: 'png' | 'svg') => {
   if (!url.value) return
 
   try {
+    const urlToEncode = finalUrl.value || url.value
     let data: string
     let filename: string
 
     if (format === 'png') {
-      data = await QRCode.toDataURL(url.value, {
+      data = await QRCode.toDataURL(urlToEncode, {
         width: qrSize.value,
         margin: 2,
         errorCorrectionLevel: errorCorrectionLevel.value
@@ -97,7 +151,7 @@ const downloadQR = async (format: 'png' | 'svg') => {
       filename = 'qrcode.png'
     } else {
       // For SVG
-      data = await QRCode.toString(url.value, {
+      data = await QRCode.toString(urlToEncode, {
         type: 'svg',
         margin: 2,
         errorCorrectionLevel: errorCorrectionLevel.value
@@ -119,17 +173,36 @@ const downloadQR = async (format: 'png' | 'svg') => {
 }
 
 const useHistoryItem = (item: QrHistoryItem) => {
-  url.value = item.url
+  // Parse the URL to extract base URL and parameters
+  try {
+    const urlObj = new URL(item.url)
+    url.value = `${urlObj.protocol}//${urlObj.host}${urlObj.pathname}`
+    
+    // Clear existing parameters and populate from history
+    urlParams.value = []
+    urlObj.searchParams.forEach((value, key) => {
+      urlParams.value.push({
+        id: generateId(),
+        key,
+        value
+      })
+    })
+  } catch {
+    // If URL parsing fails, just use the full URL as is
+    url.value = item.url
+    urlParams.value = []
+  }
+  
   qrCode.value = item.qrCode
   errorCorrectionLevel.value = item.settings.errorCorrectionLevel
   qrSize.value = item.settings.size
   showHistory.value = false // Close mobile history panel if open
 }
 
-
 // Share QR code using Web Share API
 const shareQRCode = async () => {
-  if (!url.value || !qrCode.value) return
+  const urlToShare = finalUrl.value || url.value
+  if (!urlToShare || !qrCode.value) return
 
   try {
     // Convert the QR code image to a Blob
@@ -141,9 +214,9 @@ const shareQRCode = async () => {
 
     // Share the URL and image
     await navigator.share({
-      title: 'QR Code for ' + url.value,
-      text: 'Scan this QR code to visit: ' + url.value,
-      url: url.value,
+      title: 'QR Code for ' + urlToShare,
+      text: 'Scan this QR code to visit: ' + urlToShare,
+      url: urlToShare,
       files: [file]
     })
   } catch (err) {
@@ -157,8 +230,8 @@ const shareQRCode = async () => {
     try {
       await navigator.share({
         title: 'QR Code',
-        text: 'Here is a QR code link for: ' + url.value,
-        url: url.value
+        text: 'Here is a QR code link for: ' + urlToShare,
+        url: urlToShare
       })
     } catch (fallbackErr) {
       console.error('Error sharing QR code:', fallbackErr)
@@ -186,6 +259,64 @@ const shareQRCode = async () => {
       <div class="space-y-2">
         <Label for="url">Enter URL</Label>
         <Input id="url" v-model="url" placeholder="https://example.com" @keyup.enter="generateQR" />
+        <div v-if="finalUrl && finalUrl !== url" class="text-xs text-muted-foreground mt-1 p-2 bg-muted/30 rounded">
+          <strong>Final URL:</strong> {{ finalUrl }}
+        </div>
+      </div>
+
+      <!-- URL Parameters Section -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <Label class="text-sm font-medium">URL Parameters</Label>
+        </div>
+
+        <transition enter-active-class="transition-all duration-300 ease-out"
+          leave-active-class="transition-all duration-200 ease-in" 
+          enter-from-class="opacity-0 max-h-0"
+          enter-to-class="opacity-100 max-h-96" 
+          leave-from-class="opacity-100 max-h-96"
+          leave-to-class="opacity-0 max-h-0">
+          <div class="space-y-3 overflow-hidden">
+            <div class="text-xs text-muted-foreground">
+              Add query parameters to append to your URL (e.g., utm_source=qr, ref=mobile)
+            </div>
+            
+            <div v-for="param in urlParams" :key="param.id" class="flex gap-2 items-center">
+              <Input 
+                v-model="param.key" 
+                placeholder="Parameter name" 
+                class="flex-1"
+              />
+              <span class="text-muted-foreground">=</span>
+              <Input 
+                v-model="param.value" 
+                placeholder="Parameter value" 
+                class="flex-1"
+              />
+              <Button 
+                @click="removeUrlParam(param.id)" 
+                variant="ghost" 
+                size="icon"
+                class="flex-shrink-0"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <path d="M3 6h18"></path>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                </svg>
+              </Button>
+            </div>
+
+            <Button @click="addUrlParam" variant="outline" size="sm" class="w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12h8"></path>
+                <path d="M12 8v8"></path>
+              </svg>
+              Add Parameter
+            </Button>
+          </div>
+        </transition>
       </div>
 
       <transition enter-active-class="transition-all duration-300 ease-out"
@@ -195,19 +326,29 @@ const shareQRCode = async () => {
         <div class="space-y-2 overflow-hidden" v-if="showOptions">
           <Label for="error-correction">Error Correction Level</Label>
           <div class="flex space-x-2">
-            <Button v-for="level in ['L', 'M', 'Q', 'H']" :key="level" @click="errorCorrectionLevel = level"
+            <Button v-for="level in (['L', 'M', 'Q', 'H'] as const)" :key="level" @click="errorCorrectionLevel = level"
               :variant="errorCorrectionLevel === level ? 'default' : 'outline'" size="sm"
               class="transition-all duration-200">
               {{ level }}
             </Button>
           </div>
-          <p class="text-xs text-muted-foreground mt-1">
-            L: Low (7%) | M: Medium (15%) | Q: Quartile (25%) | H: High (30%)
-          </p>
+          <div class="text-xs text-muted-foreground mt-1 space-y-1">
+            <p><strong>Error Correction:</strong> Higher levels allow the QR code to be read even when partially damaged or obscured.</p>
+            <p><strong>L:</strong> Low (7%) - Smallest size, use for clean environments</p>
+            <p><strong>M:</strong> Medium (15%) - Recommended for most uses</p>
+            <p><strong>Q:</strong> Quartile (25%) - Good for outdoor use or when QR may get dirty</p>
+            <p><strong>H:</strong> High (30%) - Best for harsh conditions, logos can be embedded</p>
+          </div>
 
           <div class="mt-4">
-            <Label for="size">QR Code Size</Label>
+            <Label for="size">QR Code Size (pixels)</Label>
             <Input id="size" v-model.number="qrSize" type="number" min="100" max="1000" step="50" />
+            <div class="text-xs text-muted-foreground mt-1 space-y-1">
+              <p><strong>Size Guide:</strong> Larger QR codes are easier to scan from a distance but create bigger files.</p>
+              <p><strong>200-300px:</strong> Good for digital sharing and close-range scanning</p>
+              <p><strong>400-600px:</strong> Ideal for printing on business cards, flyers</p>
+              <p><strong>700-1000px:</strong> Best for posters, banners, or long-distance scanning</p>
+            </div>
           </div>
         </div>
       </transition>
