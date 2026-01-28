@@ -99,6 +99,26 @@ const generateId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 9)
 }
 
+// Default UTM tracking parameters
+const defaultTrackingParams = [
+  { key: 'utm_source', value: 'qr' },
+  { key: 'utm_medium', value: 'qr_code' },
+  { key: 'utm_campaign', value: '' }
+]
+
+const addDefaultTracking = () => {
+  defaultTrackingParams.forEach(param => {
+    const exists = urlParams.value.some(p => p.key === param.key)
+    if (!exists) {
+      urlParams.value.push({
+        id: generateId(),
+        key: param.key,
+        value: param.value
+      })
+    }
+  })
+}
+
 const generateQR = async () => {
   if (!url.value) return
 
@@ -314,6 +334,14 @@ const shareQRCode = async () => {
                 <path d="M12 8v8"></path>
               </svg>
               Add Parameter
+            </Button>
+
+            <Button @click="addDefaultTracking" variant="secondary" size="sm" class="w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2">
+                <path d="M3 3v18h18"></path>
+                <path d="m19 9-5 5-4-4-3 3"></path>
+              </svg>
+              Add UTM Tracking
             </Button>
           </div>
         </transition>
